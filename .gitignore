@@ -1,0 +1,7 @@
+# Ignore virtual environment directory
+.venv/
+
+# Ignore logs directory
+logs/
+
+
