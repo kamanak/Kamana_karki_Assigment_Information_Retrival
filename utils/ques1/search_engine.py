@@ -11,12 +11,12 @@ from ..logging_config import setup_logger
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
-
+import ast
 
 class SearchEngine:
     def __init__(self, index_file='data/publications.csv'):
         """
-        Initializes the AdvancedSearchEngine with a TF-IDF vectorizer and CSV file.
+        Initializes the SearchEngine with a TF-IDF vectorizer and CSV file.
 
         Parameters:
         index_file (str): The path to the CSV file containing the publication records.
@@ -65,33 +65,20 @@ class SearchEngine:
 
         results = []
         for index in top_indices:
+            authors = self.dataframe.iloc[index]['Authors']
+            profile_links = self.dataframe.iloc[index]['Pureportal Profile Link']
+            
+            # Assuming authors and profile_links are lists and need to be processed
+            author_list = authors.strip("[]").replace("'", "").split(', ')
+            profile_list = profile_links.strip("[]").replace("'", "").split(', ')
+
             results.append({
                 'Title': self.dataframe.iloc[index]['Title of the Research Paper'],
                 'Link': self.dataframe.iloc[index]['Link to the Research Paper'],
                 'Published Date': self.dataframe.iloc[index]['Published Date'],
-                'Authors': self.dataframe.iloc[index]['Authors'],
-                'Profile Link': self.dataframe.iloc[index]['Pureportal Profile Link']
+                'Authors': author_list,
+                'Profile Links': profile_list
             })
 
         self.logger.info(f"Found {len(results)} results for the query.")
         return results
-
-    def display_results(self, results):
-        """
-        Displays the search results in a readable format with clickable links.
-
-        Parameters:
-        results (list): A list of dictionaries containing search results.
-        """
-        if results:
-            print("Found", len(results), "documents matching the search query:")
-            for result in results:
-                print("------------------------------------------------------------------------------------------")
-                print("Title:", result['Title'])
-                print("Link:", result['Link'])
-                print("Published Date:", result['Published Date'])
-                print("Authors:", result['Authors'])
-                print("Profile Link:", result['Profile Link'])
-                print()
-        else:
-            print("No documents found matching the search query.")
