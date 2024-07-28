@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Engine</title>
+    <title>Search Engine and Document Classification</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,8 +24,10 @@
         .container {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             height: 80vh;
+            gap: 20px;
+            padding-top: 50px;
         }
         form {
             border: 1px solid #ddd;
@@ -33,13 +35,15 @@
             border-radius: 8px;
             background-color: #fafafa;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
         }
-        input[type="text"] {
+        input[type="text"], textarea {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 300px;
+            width: 100%;
             box-sizing: border-box;
+            margin-bottom: 10px;
         }
         button {
             padding: 10px 20px;
@@ -65,13 +69,18 @@
 <body>
     <header>
         <img src="{{ url_for('static', filename='college_logo.png') }}" alt="College Logo">
-        <h1>Kamana Karki Assigment</h1>
+        <h1>Kamana Karki Assignment</h1>
     </header>
     <div class="container">
         <form action="/" method="post">
             <h1>Search Engine</h1>
             <input type="text" name="query" placeholder="Enter your search query" required>
             <button type="submit">Search</button>
+        </form>
+        <form action="/" method="post">
+            <h1>Document Clustering</h1>
+            <textarea name="document" placeholder="Enter your document text" rows="6" required></textarea>
+            <button type="submit">Classify</button>
         </form>
     </div>
     <footer>

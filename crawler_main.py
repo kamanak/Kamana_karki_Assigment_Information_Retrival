@@ -1,4 +1,4 @@
-from utils.ques1.scheduler import CrawlerScheduler
+from utils.search_engine_utils.scheduler import CrawlerScheduler
 from utils.logging_config import setup_logger
 
 def main():

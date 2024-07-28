@@ -1,62 +1,90 @@
-from utils.ques2.data_preprocessing import DataPreprocessor
-from utils.ques2.clustering_evaluation import evaluate_clustering_methods
-from utils.ques2.document_clustering import DocumentClustering
+# main.py
+from utils.clusturing_utils.data_preprocessing import DataPreprocessor
+from utils.clusturing_utils.document_clustering import DocumentClustering
 from utils.logging_config import setup_logger
 
-import pandas as pd
-
-# Set up the logger
+# Configure logger
 logger = setup_logger()
 
+def evaluate_model(documents, n_clusters):
+    """
+    Evaluates the KMeans clustering model using silhouette score.
 
-# Define RSS feed URLs and categories
-categories = {
-    'http://rss.cnn.com/rss/edition_sport.rss': 'Sports',
-    'http://feeds.bbci.co.uk/news/technology/rss.xml': 'Technology',
-    'http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml': 'Entertainment',
-    'http://feeds.bbci.co.uk/news/politics/rss.xml': 'Politics',
-    'http://rss.cnn.com/rss/money_news_international.rss': 'Business'
-}
+    Args:
+        documents (list): A list of preprocessed document texts.
+        n_clusters (int): The number of clusters to evaluate.
+
+    Returns:
+        tuple: The silhouette score and the trained model.
+    """
+    logger.info(f"Evaluating model with {n_clusters} clusters...")
+    clustering = DocumentClustering(n_clusters=n_clusters)
+    X_transformed = clustering.fit(documents)
+    labels = clustering.model.predict(X_transformed)
+    score = clustering.get_silhouette_score(X_transformed, labels)
+    
+    # Log cluster details
+    cluster_details = clustering.get_cluster_details()
+    logger.info(f"Cluster details for {n_clusters} clusters:")
+    for cluster_id, details in cluster_details.items():
+        logger.info(f"Cluster {cluster_id}: Top Terms - {details['terms']}")
+    
+    return score, clustering
 
 def main():
     """
-    Main function to run the document clustering application. Fetches, preprocesses documents,
-    evaluates clustering methods, and allows user interaction for document classification.
+    Main function to fetch documents, preprocess them, evaluate clustering methods,
+    and save the best model.
     """
-    logger.info("Application started.")
-    logger.info("Fetching and preprocessing documents.")
+    logger.info("Starting model training and saving process.")
+
+    # Define RSS feed URLs and categories
+    categories = {
+        'http://rss.cnn.com/rss/edition_sport.rss': 'Sports',
+        'http://feeds.bbci.co.uk/news/technology/rss.xml': 'Technology',
+        'http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml': 'Entertainment',
+        'http://feeds.bbci.co.uk/news/politics/rss.xml': 'Politics',
+        'http://rss.cnn.com/rss/money_news_international.rss': 'Business'
+    }
+
+    # Initialize DataPreprocessor
     preprocessor = DataPreprocessor()
-    documents = preprocessor.fetch_and_preprocess(categories, categories.values())
-    logger.info("Documents fetched and preprocessed.")
-
-    logger.info("Evaluating clustering methods.")
-    scores = evaluate_clustering_methods(documents, categories)
     
-    for method, score in scores.items():
-        logger.info(f'{method.capitalize()}: {score}')
+    # Fetch and preprocess documents
+    logger.info("Fetching and preprocessing documents.")
+    documents = preprocessor.fetch_and_preprocess(categories, list(categories.values()))
+    preprocessor.create_word_cloud(documents)
+    
+    if not documents:
+        logger.error("No documents available for clustering. Exiting.")
+        return
 
-    while True:
-        user_input = input("\nPlease select one of the options below. \na. Search for a cluster using a news headline \nb. Exit\n")
+    # Define the range of clusters to evaluate
+    cluster_ranges = range(2, 6)  # Example range from 2 to 10 clusters
+    best_score = -1
+    best_model = None
+    best_n_clusters = 0
 
-        if user_input == 'a':
-            query = input("Enter a news headline to classify:\n")
-            preprocessed_query = preprocessor.preprocess_text(query)
-            logger.info(f"User query: {query}")
-            
-            try:
-                clustering = DocumentClustering(n_clusters=len(categories))
-                clustering.fit(documents)
-                cluster = clustering.predict(preprocessed_query)
-                logger.info(f"The query belongs to cluster: {cluster}")
-                print(f"Predicted cluster for the query: {cluster}")
-            except ValueError as e:
-                logger.error(f"Error during prediction: {e}")
-        elif user_input == 'b':
-            logger.info("Exiting the application.")
-            break
-        else:
-            logger.warning("Invalid option selected.")
-            print("Invalid option. Please try again.")
+    # Evaluate models with different cluster sizes
+    for n_clusters in cluster_ranges:
+        try:
+            score, clustering = evaluate_model(documents, n_clusters)
+            logger.info(f"Cluster count: {n_clusters}, Silhouette Score: {score}")
+            if score > best_score:
+                best_score = score
+                best_model = clustering
+                best_n_clusters = n_clusters
+        except Exception as e:
+            logger.error(f"Error evaluating model with {n_clusters} clusters: {e}")
+
+    if best_model:
+        # Save the best model and vectorizer
+        best_model.save('./models/best_clustering_model.pkl', './models/best_vectorizer.pkl')
+        logger.info(f"Best model with {best_n_clusters} clusters saved successfully.")
+    else:
+        logger.error("No suitable model found during evaluation.")
+
+    logger.info("Model training and saving process completed.")
 
 if __name__ == "__main__":
     main()
