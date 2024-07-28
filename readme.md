@@ -40,12 +40,14 @@ This project implements a comprehensive system for document clustering and searc
    pip install -r requirements.txt
 
 2. **Save profile,pulblications**
+   
    This module will save profile and publications to data folder, so that it can be used in search in search engine.
    
    ```bash
    python crawler_main.py
 
 4. **Save clusturing model and vectorizer**
+   
    This module will save the best model and vectorizer which will be used during documnet clusturing
   
    ```bash
