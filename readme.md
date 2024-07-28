@@ -39,7 +39,7 @@ This project implements a comprehensive system for document clustering and searc
    ```bash
    pip install -r requirements.txt
 
-2. **Save profile,pulblications and clusturing model**
+2. **Save profile,pulblications**
    Before runnig FLASK application run this modules:
    
    ```bash
@@ -47,14 +47,16 @@ This project implements a comprehensive system for document clustering and searc
 
    This module will save profile and publications to data folder, so that it can be used in search in search engine.
 
+4. **Save clusturing model and vectorizer**
+  
    ```bash
    python clustering_main.py
 
-  This module will save the best model and vectorizer which will be used during documnet clusturing
+   This module will save the best model and vectorizer which will be used during documnet clusturing
 
 3. **Webite**
    
-   To Run the website 
+   To Run the website.
 
    ```bash
    python app_main.py
