@@ -61,6 +61,9 @@ This project implements a comprehensive system for document clustering and searc
    python app_main.py
 
 ## .gitignore
-   .vev(virtual environment) 
+   
+   .vev(virtual environment)
+
    logs
+  
    This two folder are ignored
